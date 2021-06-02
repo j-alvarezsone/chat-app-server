@@ -5,11 +5,16 @@ const socketIo = require('socket.io');
 const http = require('http');
 const Sockets = require('./socket');
 const cors = require('cors');
+// DB
+const { dbConnection } = require('../database/config');
 
 class Server {
   constructor() {
     this.app = express();
     this.port = process.env.PORT;
+
+    // conectar a DB
+    dbConnection();
 
     // http server
     this.server = http.createServer(this.app);
