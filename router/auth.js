@@ -3,14 +3,33 @@ path: /api/login
 */
 
 const { Router } = require('express');
+const { check } = require('express-validator');
 const { createUser, userLogin, revalidateToken } = require('../controllers/auth');
+const { validateFields } = require('../middlewares/validate-fields');
 
 const router = Router();
 // crear nuevos usuarios
-router.post('/new', createUser);
+router.post(
+  '/new',
+  [
+    check('name', 'name is required').not().isEmpty(),
+    check('email', 'Email is required').isEmail(),
+    check('password', 'The password must be 6 characters').isLength({ min: 6 }),
+    validateFields,
+  ],
+  createUser,
+);
 
 // login
-router.post('/', userLogin);
+router.post(
+  '/',
+  [
+    check('email', 'Email is required').isEmail(),
+    check('password', 'The password must be 6 characters').isLength({ min: 6 }),
+    validateFields,
+  ],
+  userLogin,
+);
 
 // revalidar token
 router.get('/renew', revalidateToken);
