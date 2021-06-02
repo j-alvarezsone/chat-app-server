@@ -1,6 +1,7 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
+const { generateJWT } = require('../helpers/jwt');
 
 const createUser = async (req, res = response) => {
   try {
@@ -24,8 +25,13 @@ const createUser = async (req, res = response) => {
     // grabar usuario en DB
     await user.save();
 
+    // general el jwt
+    const token = await generateJWT(user.id);
+
     res.json({
+      ok: true,
       user,
+      token,
     });
   } catch (error) {
     console.log(error);
@@ -38,12 +44,41 @@ const createUser = async (req, res = response) => {
 
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
-  res.json({
-    ok: true,
-    msg: 'login',
-    email,
-    password,
-  });
+
+  try {
+    // verificar si existe el correo
+    const userDB = await User.findOne({ email });
+    if (!userDB) {
+      return res.status(404).json({
+        ok: false,
+        msg: 'User does not exist with that email',
+      });
+    }
+
+    // validar el password
+    const validPassword = bcrypt.compareSync(password, userDB.password);
+    if (!validPassword) {
+      return res.status(404).json({
+        ok: false,
+        msg: 'Incorrect password',
+      });
+    }
+
+    // general el jwt
+    const token = await generateJWT(userDB.id);
+
+    res.json({
+      ok: true,
+      user: userDB,
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      ok: false,
+      msg: 'Please be in contact with the administrator',
+    });
+  }
 };
 
 const revalidateToken = async (req, res) => {
