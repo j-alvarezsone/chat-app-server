@@ -4,3 +4,4 @@ node_modules/
 antigen.zsh
 
 .env
+.DS_Store
