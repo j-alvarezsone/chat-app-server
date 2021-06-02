@@ -33,6 +33,9 @@ class Server {
 
     // cors
     this.app.use(cors());
+
+    // API endpoints
+    this.app.use('/api/login', require('../router/auth'));
   }
 
   execute() {
