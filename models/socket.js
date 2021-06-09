@@ -29,10 +29,11 @@ class Sockets {
       // emitir todos los usuarios conectados
       this.io.emit('users-list', await getUsers());
       // TODO socket join
-      // TODO  escuchar cuando el cliente manda un mensaje, mensaje personal
+      // escuchar cuando el cliente manda un mensaje, mensaje personal
       socket.on('personal-message', async (payload) => {
         const message = await SaveMessage(payload);
-        console.log(message);
+        this.io.to(payload.to).emit('personal-message', message);
+        this.io.to(payload.from).emit('personal-message', message);
       });
       // TODO  disconnect, marcar en el DB que el usuario se desconecto
       // TODO  emitir todos los usuarios conectados
